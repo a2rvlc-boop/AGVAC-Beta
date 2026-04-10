@@ -85,7 +85,7 @@ SOBRE_AGVAC_HTML = f"""
         <img src="{URL_LOGO_MRG}" width="70">
     </div>
     <h3 style="text-align:center; margin-top:0;">Sobre AGVAC</h3>
-    <p><b>AGVAC</b> es una solución tecnológica diseñada específicamente para optimizar la gestión de inventarios de vacunas en entornos sanitarios. Nuestra misión es simplificar el flujo de trabajo del personal sanitario, automatizando la carga administrativa y minimizando el riesgo de errores humanos de stock.</p>
+    <p><b>AGVAC</b> es una solución tecnológica diseñada específicamente para optimizar la gestión de inventarios de vacunas en entornos sanitarios. Nuestra misión es simplificar el flujo de trabajo del personal sanitario, automatizando la carga administrativa y minimizando el riesgo de errores de stock.</p>
     <p>Esta aplicación ha sido diseñada y desarrollada por <b>MRG Healthcare Applications</b>, un grupo multidisciplinar de trabajadores del sector de la salud e informática dedicados al diseño de nuevas herramientas digitales que den respuesta a los desafíos reales de la sanidad moderna.</p>
     <ul>
         <li><b>Registro Automatizado:</b> Trazabilidad de dosis administradas en gestión de stock.</li>
