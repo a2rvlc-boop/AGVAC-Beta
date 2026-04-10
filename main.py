@@ -69,7 +69,7 @@ def login():
             st.session_state.autenticado = True
             st.rerun()
         else: st.error("Error de credenciales")
-    st.markdown("<div class='login-footer-version'>MRGAGVAC2026.1.7.1 | AGVAC</div>", unsafe_allow_html=True)
+    st.markdown("<div class='login-footer-version'>MRGAGVAC2026.1.7.1 | Beta AGVAC</div>", unsafe_allow_html=True)
 
 if not st.session_state.autenticado:
     login()
@@ -216,4 +216,4 @@ with tab_conf:
             del st.session_state.lista_vacunas[v_borrar]
         st.rerun()
 
-st.markdown('<div class="footer">MRGAGVAC2026.1.7.1 | Sistema Privado AGVAC</div>', unsafe_allow_html=True)
+st.markdown('<div class="footer">MRGAGVAC2026.1.7.1 | Beta AGVAC</div>', unsafe_allow_html=True)
