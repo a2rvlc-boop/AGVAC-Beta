@@ -1,7 +1,90 @@
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+from datetime import datetime
+import os
+
+# --- 1. CONFIGURACIÓN DE PÁGINA ---
+st.set_page_config(page_title="AGVAC", layout="wide")
+
+# Estilos CSS
+st.markdown("""
+    <style>
+    .main { background-color: #FFFFFF; }
+    .stButton>button { background-color: #005b7f; color: white; border-radius: 8px; font-weight: bold; width: 100%; }
+    .stButton>button:hover { background-color: #00425c; color: white; }
+    h1, h2, h3 { color: #004561; font-family: 'Arial', sans-serif; }
+    .footer { position: fixed; bottom: 0; left: 0; width: 100%; text-align: center; color: #9e9e9e; font-size: 11px; padding-bottom: 10px; background-color: white; width: 100%; }
+    .login-footer-version { text-align: center; color: #9e9e9e; font-size: 12px; margin-top: 20px; }
+    
+    /* Caja corporativa Sobre AGVAC */
+    .about-box { 
+        background-color: #f8f9fa; 
+        padding: 25px; 
+        border-radius: 12px; 
+        border-left: 6px solid #005b7f;
+        margin-top: 20px;
+        font-size: 14px;
+        color: #333;
+        line-height: 1.6;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .logo-container-about {
+        display: flex;
+        justify-content: center;
+        gap: 30px;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# --- 2. ARCHIVOS Y DATOS INICIALES ---
+DB_FILE = "datos_agvac.csv"
+STOCK_FILE = "stock_agvac.csv"
+URL_LOGO_MRG = "https://raw.githubusercontent.com/a2rvlc-boop/AGVAC/refs/heads/main/logomrg.png"
+URL_LOGO_AGVAC = "https://raw.githubusercontent.com/a2rvlc-boop/AGVAC/refs/heads/main/logo_agvac.png"
+
+# Mínimos críticos por defecto
+MINIMOS_DEFAULT = {
+    "Herpes Zoster": 20, "Neumococo20": 20, "ProQuad": 2, "VariVax": 2,
+    "Priorix": 2, "Mpox": 2, "GRIPE": 2, "VPH": 10, "HepB": 10,
+    "HepB Hemo": 5, "HepA": 10, "HepA+B": 5, "Meningitis ACW135Y": 10,
+    "Meningitis B": 5, "Tetanos-Difteria": 20, "Boostrix": 5,
+    "Hexa": 5, "Vivotif": 15, "Fiebre Tifoidea": 10, "Fiebre Amarilla": 10, "COVID": 2
+}
+
+if 'lista_vacunas' not in st.session_state:
+    st.session_state.lista_vacunas = {
+        "Herpes Zoster": "#FF8C00", "Neumococo20": "#00008B", "ProQuad": "#808080",
+        "VariVax": "#FF0000", "Priorix": "#A9A9A9", "Mpox": "#FFFF00",
+        "GRIPE": "#ADD8E6", "VPH": "#AEC6CF", "HepB": "#9ACD32",
+        "HepB Hemo": "#808000", "HepA": "#000080", "HepA+B": "#90EE90",
+        "Meningitis ACW135Y": "#D3D3D3", "Meningitis B": "#800000",
+        "Tetanos-Difteria": "#FF4500", "Boostrix": "#800080", "Hexa": "#7DF9FF",
+        "Vivotif": "#77DD77", "Fiebre Tifoidea": "#00FF7F", "Fiebre Amarilla": "#CCFF00",
+        "COVID": "#E6E6FA"
+    }
+
+# Asegurar existencia de archivos
+if not os.path.exists(DB_FILE):
+    pd.DataFrame(columns=["Fecha", "Vacuna", "Semana", "Mes", "Año"]).to_csv(DB_FILE, index=False)
+
+if not os.path.exists(STOCK_FILE):
+    df_stock_init = pd.DataFrame([
+        {"Vacuna": v, "Cantidad": 25, "Minimo": MINIMOS_DEFAULT.get(v, 5)} 
+        for v in st.session_state.lista_vacunas.keys()
+    ])
+    df_stock_init.to_csv(STOCK_FILE, index=False)
+
+# --- BLOQUE CORPORATIVO "SOBRE AGVAC" ---
+SOBRE_AGVAC_HTML = f"""
+<div class="about-box">
+    <div class="logo-container-about">
+        <img src="{URL_LOGO_AGVAC}" width="70">
         <img src="{URL_LOGO_MRG}" width="70">
     </div>
     <h3 style="text-align:center; margin-top:0;">Sobre AGVAC</h3>
-    <p><b>AGVAC</b> es una solución tecnológica diseñada específicamente para optimizar la gestión de inventarios de vacunas en entornos sanitarios. Nuestra misión es simplificar el flujo de trabajo del personal sanitario, automatizando la carga administrativa y minimizando el riesgo de errores humanos de stock.</p>
     <p><b>AGVAC</b> es una solución tecnológica diseñada específicamente para optimizar la gestión de inventarios de vacunas en entornos sanitarios. Nuestra misión es simplificar el flujo de trabajo del personal sanitario, automatizando la carga administrativa y minimizando el riesgo de errores de stock.</p>
     <p>Esta aplicación ha sido diseñada y desarrollada por <b>MRG Healthcare Applications</b>, un grupo multidisciplinar de trabajadores del sector de la salud e informática dedicados al diseño de nuevas herramientas digitales que den respuesta a los desafíos reales de la sanidad moderna.</p>
     <ul>
@@ -27,7 +110,7 @@ def login():
                 st.session_state.autenticado = True
                 st.rerun()
             else: st.error("Error de credenciales")
-
+        
         # Mostrar descripción profesional en el login
         st.markdown(SOBRE_AGVAC_HTML, unsafe_allow_html=True)
         st.markdown("<div class='login-footer-version'>MRGAGVAC2026.1.7.2 | Beta AGVAC</div>", unsafe_allow_html=True)
@@ -89,7 +172,7 @@ with tab_reg:
                     if item in df_stock['Vacuna'].values:
                         idx = df_stock.index[df_stock['Vacuna'] == item].tolist()[0]
                         df_stock.at[idx, 'Cantidad'] -= 1
-
+                
                 df_hist.to_csv(DB_FILE, index=False)
                 df_stock.to_csv(STOCK_FILE, index=False)
                 st.session_state.cesta = []
@@ -106,7 +189,7 @@ with tab_hist:
         id_eliminar = st.selectbox("Eliminar registro (devuelve dosis):", 
                                  options=df_display.index, 
                                  format_func=lambda x: f"{df_display.loc[x, 'Fecha']} | {df_display.loc[x, 'Vacuna']}")
-
+        
         if st.button("🗑️ Eliminar y Devolver Dosis"):
             vacuna_retorno = df_ver.loc[id_eliminar, 'Vacuna']
             df_stock_ret = pd.read_csv(STOCK_FILE)
